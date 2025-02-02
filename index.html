@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Invoice App</title>
+    <title>Invoice App with Timer</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -18,11 +18,21 @@
         <label for="jobDescription">Job Description:</label>
         <textarea id="jobDescription" required></textarea><br>
 
-        <label for="startTime">Start Time:</label>
-        <input type="datetime-local" id="startTime" required><br>
+        <!-- Timer Section -->
+        <div id="timerSection">
+            <p><strong>Work Timer:</strong> <span id="workTimer">00:00:00</span></p>
+            <button type="button" id="startTimer">Start</button>
+            <button type="button" id="pauseTimer">Pause</button>
+            <button type="button" id="resumeTimer" style="display: none;">Resume</button>
+            <button type="button" id="stopTimer">Stop</button>
+        </div>
 
-        <label for="endTime">End Time:</label>
-        <input type="datetime-local" id="endTime" required><br>
+        <!-- Break Timer Section -->
+        <div id="breakTimerSection">
+            <p><strong>Break Timer:</strong> <span id="breakTimer">00:00:00</span></p>
+            <button type="button" id="startBreak">Start Break</button>
+            <button type="button" id="endBreak">End Break</button>
+        </div>
 
         <label for="hourlyRate">Hourly Rate ($):</label>
         <input type="number" step="0.01" id="hourlyRate" required><br>
@@ -41,86 +51,7 @@
     <button id="downloadInvoice" style="display: none;">Download Invoice</button>
 
     <!-- Include jsPDF library -->
-   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script>
-        document.getElementById('invoiceForm').addEventListener('submit', function (e) {
-            e.preventDefault();
-
-            // Get form values
-            const clientName = document.getElementById('clientName').value;
-            const invoiceDue = document.getElementById('invoiceDue').value;
-            const jobDescription = document.getElementById('jobDescription').value;
-            const startTime = new Date(document.getElementById('startTime').value);
-            const endTime = new Date(document.getElementById('endTime').value);
-            const hourlyRate = parseFloat(document.getElementById('hourlyRate').value);
-            const companyLogo = document.getElementById('companyLogo').files[0];
-
-            // Calculate total hours and cost
-            const timeDiff = endTime - startTime;
-            const totalHours = timeDiff / (1000 * 60 * 60); // Convert milliseconds to hours
-            const totalCost = totalHours * hourlyRate;
-
-            // Display invoice
-            let invoiceHTML = `
-                <p><strong>Client Name:</strong> ${clientName}</p>
-                <p><strong>Invoice Due:</strong> ${invoiceDue}</p>
-                <p><strong>Job Description:</strong> ${jobDescription}</p>
-                <p><strong>Start Time:</strong> ${startTime.toLocaleString()}</p>
-                <p><strong>End Time:</strong> ${endTime.toLocaleString()}</p>
-                <p><strong>Hourly Rate:</strong> $${hourlyRate.toFixed(2)}</p>
-                <p><strong>Total Hours:</strong> ${totalHours.toFixed(2)}</p>
-                <p><strong>Total Cost:</strong> $${totalCost.toFixed(2)}</p>
-            `;
-
-            // Display logo if uploaded
-            if (companyLogo) {
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    invoiceHTML += `<img src="${e.target.result}" alt="Company Logo" style="max-width: 200px;">`;
-                    document.getElementById('invoiceOutput').innerHTML = invoiceHTML;
-                    document.getElementById('downloadInvoice').style.display = 'block';
-                };
-                reader.readAsDataURL(companyLogo);
-            } else {
-                document.getElementById('invoiceOutput').innerHTML = invoiceHTML;
-                document.getElementById('downloadInvoice').style.display = 'block';
-            }
-
-            // Add event listener for the download button
-            document.getElementById('downloadInvoice').addEventListener('click', function () {
-                generatePDF(clientName, invoiceDue, jobDescription, startTime, endTime, hourlyRate, totalHours, totalCost, companyLogo);
-            });
-        });
-
-        function generatePDF(clientName, invoiceDue, jobDescription, startTime, endTime, hourlyRate, totalHours, totalCost, companyLogo) {
-            const doc = new jspdf.jsPDF();
-
-            // Add invoice details to the PDF
-            doc.setFontSize(18);
-            doc.text("Invoice", 10, 20);
-            doc.setFontSize(12);
-            doc.text(`Client Name: ${clientName}`, 10, 30);
-            doc.text(`Invoice Due: ${invoiceDue}`, 10, 40);
-            doc.text(`Job Description: ${jobDescription}`, 10, 50);
-            doc.text(`Start Time: ${startTime.toLocaleString()}`, 10, 60);
-            doc.text(`End Time: ${endTime.toLocaleString()}`, 10, 70);
-            doc.text(`Hourly Rate: $${hourlyRate.toFixed(2)}`, 10, 80);
-            doc.text(`Total Hours: ${totalHours.toFixed(2)}`, 10, 90);
-            doc.text(`Total Cost: $${totalCost.toFixed(2)}`, 10, 100);
-
-            // Add logo if available
-            if (companyLogo) {
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    const imgData = e.target.result;
-                    doc.addImage(imgData, 'JPEG', 10, 110, 50, 50); // Adjust size and position as needed
-                    doc.save('invoice.pdf'); // Save the PDF
-                };
-                reader.readAsDataURL(companyLogo);
-            } else {
-                doc.save('invoice.pdf'); // Save the PDF without the logo
-            }
-        }
-    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
