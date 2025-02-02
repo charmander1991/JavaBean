@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice App</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>Create Invoice</h1>
+    <form id="invoiceForm">
+        <label for="clientName">Client Name:</label>
+        <input type="text" id="clientName" required><br>
+
+        <label for="invoiceDue">Invoice Due:</label>
+        <input type="date" id="invoiceDue" required><br>
+
+        <label for="jobDescription">Job Description:</label>
+        <textarea id="jobDescription" required></textarea><br>
+
+        <label for="startTime">Start Time:</label>
+        <input type="datetime-local" id="startTime" required><br>
+
+        <label for="endTime">End Time:</label>
+        <input type="datetime-local" id="endTime" required><br>
+
+        <label for="hourlyRate">Hourly Rate ($):</label>
+        <input type="number" step="0.01" id="hourlyRate" required><br>
+
+        <label for="companyLogo">Company Logo:</label>
+        <input type="file" id="companyLogo" accept="image/*"><br>
+
+        <button type="submit">Create Invoice</button>
+    </form>
+
+    <h2>Invoice</h2>
+    <div id="invoiceOutput">
+        <!-- Invoice details will be displayed here -->
+    </div>
+
+    <script>
+        document.getElementById('invoiceForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            // Get form values
+            const clientName = document.getElementById('clientName').value;
+            const invoiceDue = document.getElementById('invoiceDue').value;
+            const jobDescription = document.getElementById('jobDescription').value;
+            const startTime = new Date(document.getElementById('startTime').value);
+            const endTime = new Date(document.getElementById('endTime').value);
+            const hourlyRate = parseFloat(document.getElementById('hourlyRate').value);
+            const companyLogo = document.getElementById('companyLogo').files[0];
+
+            // Calculate total hours and cost
+            const timeDiff = endTime - startTime;
+            const totalHours = timeDiff / (1000 * 60 * 60); // Convert milliseconds to hours
+            const totalCost = totalHours * hourlyRate;
+
+            // Display invoice
+            let invoiceHTML = `
+                <p><strong>Client Name:</strong> ${clientName}</p>
+                <p><strong>Invoice Due:</strong> ${invoiceDue}</p>
+                <p><strong>Job Description:</strong> ${jobDescription}</p>
+                <p><strong>Start Time:</strong> ${startTime.toLocaleString()}</p>
+                <p><strong>End Time:</strong> ${endTime.toLocaleString()}</p>
+                <p><strong>Hourly Rate:</strong> $${hourlyRate.toFixed(2)}</p>
+                <p><strong>Total Hours:</strong> ${totalHours.toFixed(2)}</p>
+                <p><strong>Total Cost:</strong> $${totalCost.toFixed(2)}</p>
+            `;
+
+            // Display logo if uploaded
+            if (companyLogo) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    invoiceHTML += `<img src="${e.target.result}" alt="Company Logo" style="max-width: 200px;">`;
+                    document.getElementById('invoiceOutput').innerHTML = invoiceHTML;
+                };
+                reader.readAsDataURL(companyLogo);
+            } else {
+                document.getElementById('invoiceOutput').innerHTML = invoiceHTML;
+            }
+        });
+    </script>
+</body>
+</html>
