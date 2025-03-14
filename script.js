@@ -1,76 +1,44 @@
-let workStartTime, workEndTime, workTimerInterval;
-let breakStartTime, breakEndTime, breakTimerInterval;
-let totalWorkTime = 0; // Total work time in milliseconds
-let totalBreakTime = 0; // Total break time in milliseconds
-
-// Work Timer Functions
-document.getElementById('startTimer').addEventListener('click', function () {
-    workStartTime = new Date();
-    workTimerInterval = setInterval(updateWorkTimer, 1000);
-    document.getElementById('startTimer').disabled = true;
-    document.getElementById('pauseTimer').disabled = false;
-    document.getElementById('stopTimer').disabled = false;
-});
-
-document.getElementById('pauseTimer').addEventListener('click', function () {
-    clearInterval(workTimerInterval);
-    totalWorkTime += new Date() - workStartTime;
-    document.getElementById('pauseTimer').style.display = 'none';
-    document.getElementById('resumeTimer').style.display = 'inline';
-});
-
-document.getElementById('resumeTimer').addEventListener('click', function () {
-    workStartTime = new Date();
-    workTimerInterval = setInterval(updateWorkTimer, 1000);
-    document.getElementById('pauseTimer').style.display = 'inline';
-    document.getElementById('resumeTimer').style.display = 'none';
-});
-
-document.getElementById('stopTimer').addEventListener('click', function () {
-    clearInterval(workTimerInterval);
-    workEndTime = new Date();
-    totalWorkTime += new Date() - workStartTime;
-    document.getElementById('startTimer').disabled = false;
-    document.getElementById('pauseTimer').disabled = true;
-    document.getElementById('stopTimer').disabled = true;
-    document.getElementById('pauseTimer').style.display = 'inline';
-    document.getElementById('resumeTimer').style.display = 'none';
-});
-
-function updateWorkTimer() {
-    const elapsedTime = totalWorkTime + (new Date() - workStartTime);
-    document.getElementById('workTimer').textContent = formatTime(elapsedTime);
+// Function to save company information
+function saveCompanyInfo(companyName, companyAddress, companyPhone) {
+    localStorage.setItem('companyName', companyName);
+    localStorage.setItem('companyAddress', companyAddress);
+    localStorage.setItem('companyPhone', companyPhone);
 }
 
-// Break Timer Functions
-document.getElementById('startBreak').addEventListener('click', function () {
-    breakStartTime = new Date();
-    breakTimerInterval = setInterval(updateBreakTimer, 1000);
-    document.getElementById('startBreak').disabled = true;
-    document.getElementById('endBreak').disabled = false;
-});
-
-document.getElementById('endBreak').addEventListener('click', function () {
-    clearInterval(breakTimerInterval);
-    breakEndTime = new Date();
-    totalBreakTime += new Date() - breakStartTime;
-    document.getElementById('startBreak').disabled = false;
-    document.getElementById('endBreak').disabled = true;
-});
-
-function updateBreakTimer() {
-    const elapsedTime = totalBreakTime + (new Date() - breakStartTime);
-    document.getElementById('breakTimer').textContent = formatTime(elapsedTime);
+// Function to retrieve company information
+function getCompanyInfo() {
+    return {
+        companyName: localStorage.getItem('companyName'),
+        companyAddress: localStorage.getItem('companyAddress'),
+        companyPhone: localStorage.getItem('companyPhone')
+    };
 }
 
-// Helper Function to Format Time
-function formatTime(milliseconds) {
-    const totalSeconds = Math.floor(milliseconds / 1000);
-    const hours = Math.floor(totalSeconds / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-    const seconds = totalSeconds % 60;
-    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+// Add event listener to the save company info button
+document.getElementById('saveCompanyInfo').addEventListener('click', function() {
+    const companyName = document.getElementById('companyNameInput').value;
+    const companyAddress = document.getElementById('companyAddressInput').value;
+    const companyPhone = document.getElementById('companyPhoneInput').value;
+    saveCompanyInfo(companyName, companyAddress, companyPhone);
+    alert('Company information saved!');
+});
+
+// Function to update billable hours
+function updateBillableHours() {
+    const workHours = parseFloat(document.getElementById('workHours').value);
+    const breakHours = parseFloat(document.getElementById('breakHours').value);
+    let calculatedBillableHours = workHours - breakHours;
+
+    if (isNaN(calculatedBillableHours)) {
+        calculatedBillableHours = 0;
+    }
+
+    document.getElementById('billableHours').value = calculatedBillableHours.toFixed(2);
 }
+
+// Add event listeners to workHours and breakHours
+document.getElementById('workHours').addEventListener('input', updateBillableHours);
+document.getElementById('breakHours').addEventListener('input', updateBillableHours);
 
 // Invoice Calculation
 document.getElementById('invoiceForm').addEventListener('submit', function (e) {
@@ -82,19 +50,25 @@ document.getElementById('invoiceForm').addEventListener('submit', function (e) {
     const jobDescription = document.getElementById('jobDescription').value;
     const hourlyRate = parseFloat(document.getElementById('hourlyRate').value);
     const companyLogo = document.getElementById('companyLogo').files[0];
+    const workHours = parseFloat(document.getElementById('workHours').value);
+    const breakHours = parseFloat(document.getElementById('breakHours').value);
+    let billableHours = parseFloat(document.getElementById('billableHours').value);
 
-    // Calculate total work time (excluding breaks)
-    const totalWorkTimeInHours = (totalWorkTime - totalBreakTime) / (1000 * 60 * 60);
-    const totalCost = totalWorkTimeInHours * hourlyRate;
+    // If billableHours is not entered, calculate it.
+    if (isNaN(billableHours)) {
+        billableHours = workHours - breakHours;
+    }
+
+    const totalCost = billableHours * hourlyRate;
 
     // Display invoice
     let invoiceHTML = `
         <p><strong>Client Name:</strong> ${clientName}</p>
         <p><strong>Invoice Due:</strong> ${invoiceDue}</p>
         <p><strong>Job Description:</strong> ${jobDescription}</p>
-        <p><strong>Total Work Time:</strong> ${formatTime(totalWorkTime)}</p>
-        <p><strong>Total Break Time:</strong> ${formatTime(totalBreakTime)}</p>
-        <p><strong>Billable Hours:</strong> ${totalWorkTimeInHours.toFixed(2)}</p>
+        <p><strong>Work Hours:</strong> ${workHours.toFixed(2)}</p>
+        <p><strong>Break Hours:</strong> ${breakHours.toFixed(2)}</p>
+        <p><strong>Billable Hours:</strong> ${billableHours.toFixed(2)}</p>
         <p><strong>Hourly Rate:</strong> $${hourlyRate.toFixed(2)}</p>
         <p><strong>Total Cost:</strong> $${totalCost.toFixed(2)}</p>
     `;
@@ -112,36 +86,85 @@ document.getElementById('invoiceForm').addEventListener('submit', function (e) {
         document.getElementById('invoiceOutput').innerHTML = invoiceHTML;
         document.getElementById('downloadInvoice').style.display = 'block';
     }
-
-    // Add event listener for the download button
-    document.getElementById('downloadInvoice').addEventListener('click', function () {
-        generatePDF(clientName, invoiceDue, jobDescription, totalWorkTimeInHours, hourlyRate, totalCost, companyLogo);
-    });
 });
 
-function generatePDF(clientName, invoiceDue, jobDescription, totalWorkTimeInHours, hourlyRate, totalCost, companyLogo) {
+document.getElementById('downloadInvoice').addEventListener('click', function () {
+    const clientName = document.getElementById('clientName').value;
+    const invoiceDue = document.getElementById('invoiceDue').value;
+    const jobDescription = document.getElementById('jobDescription').value;
+    const hourlyRate = parseFloat(document.getElementById('hourlyRate').value);
+    const companyLogo = document.getElementById('companyLogo').files[0];
+    let billableHours = parseFloat(document.getElementById('billableHours').value);
+    let totalCost = billableHours * hourlyRate; // Define totalCost here.
+
+    console.log("Download button clicked");
+    console.log("Client Name:", clientName);
+    console.log("Billable Hours:", billableHours);
+
+    generatePDF(clientName, invoiceDue, jobDescription, billableHours, hourlyRate, totalCost, companyLogo);
+});
+
+function generatePDF(clientName, invoiceDue, jobDescription, billableHours, hourlyRate, totalCost, companyLogo) {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
 
-    // Add invoice details to the PDF
-    doc.setFontSize(18);
-    doc.text("Invoice", 10, 20);
-    doc.setFontSize(12);
-    doc.text(`Client Name: ${clientName}`, 10, 30);
-    doc.text(`Invoice Due: ${invoiceDue}`, 10, 40);
-    doc.text(`Job Description: ${jobDescription}`, 10, 50);
-    doc.text(`Total Work Time: ${formatTime(totalWorkTime)}`, 10, 60);
-    doc.text(`Total Break Time: ${formatTime(totalBreakTime)}`, 10, 70);
-    doc.text(`Billable Hours: ${totalWorkTimeInHours.toFixed(2)}`, 10, 80);
-    doc.text(`Hourly Rate: $${hourlyRate.toFixed(2)}`, 10, 90);
-    doc.text(`Total Cost: $${totalCost.toFixed(2)}`, 10, 100);
+    console.log("generatePDF called");
 
-    // Add logo if available
+    // Company Information
+    const companyInfo = getCompanyInfo();
+    const companyName = companyInfo.companyName || "Your Company Name";
+    const companyAddress = companyInfo.companyAddress || "123 Main St, Anytown, USA";
+    const companyPhone = companyInfo.companyPhone || "123-456-7890";
+
+    // Fonts
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(24);
+    doc.text(companyName, 20, 30);
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(12);
+    doc.text(companyAddress, 20, 45);
+    doc.text(`Phone: ${companyPhone}`, 20, 55);
+
+    // Invoice Header
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(18);
+    doc.text("Invoice", 20, 80);
+
+    // Invoice Details
+    const startY = 90;
+    const leftColumnX = 20;
+    const rightColumnX = 100;
+    const lineHeight = 10;
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(12);
+
+    let currentY = startY;
+
+    function addDetail(label, value) {
+        doc.setFont("helvetica", "bold");
+        doc.text(label, leftColumnX, currentY + lineHeight);
+        doc.setFont("helvetica", "normal");
+        doc.text(value, rightColumnX, currentY + lineHeight);
+        currentY += lineHeight;
+    }
+
+    addDetail("Client Name:", clientName);
+    addDetail("Invoice Due:", invoiceDue);
+    addDetail("Job Description:", jobDescription);
+    addDetail("Work Hours:", parseFloat(document.getElementById('workHours').value).toFixed(2));
+    addDetail("Break Hours:", parseFloat(document.getElementById('breakHours').value).toFixed(2));
+    addDetail("Billable Hours:", billableHours.toFixed(2));
+    addDetail("Hourly Rate:", `$${hourlyRate.toFixed(2)}`);
+    addDetail("Total Cost:", `$${totalCost.toFixed(2)}`);
+
+    // Add Logo
     if (companyLogo) {
         const reader = new FileReader();
         reader.onload = function (e) {
             const imgData = e.target.result;
-            doc.addImage(imgData, 'JPEG', 10, 110, 50, 50);
+            doc.addImage(imgData, 'JPEG', 150, 20, 50, 50);
             doc.save('invoice.pdf');
         };
         reader.readAsDataURL(companyLogo);

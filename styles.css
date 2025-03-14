@@ -1,140 +1,95 @@
-/* General Styles */
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin: 0;
-    padding: 20px;
-    background-color: #f4f4f9;
-    color: #333;
+    padding: 0;
+    background-color: #121212;
+    color: #e0e0e0;
     line-height: 1.6;
 }
 
 h1, h2 {
-    color: #2c3e50;
+    color: #64b5f6;
+    text-align: center;
+    margin-top: 20px;
 }
 
-/* Form Styles */
-form {
-    background: #fff;
+/* Company Information Section Styling */
+div, form, #invoiceOutput {
+    width: 95%; /* Use width for mobile */
+    max-width: 600px; /* Limit max width for larger screens */
+    margin: 20px auto;
+    background-color: #1e1e1e;
     padding: 20px;
     border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    margin-bottom: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+    box-sizing: border-box;
 }
 
 label {
     display: block;
-    margin-top: 15px;
-    font-weight: bold;
-    color: #34495e;
+    margin-top: 10px;
+    color: #90caf9;
 }
 
-input, textarea, button {
-    width: 100%;
-    padding: 12px;
-    margin-top: 8px;
-    border: 1px solid #ddd;
+input[type="text"],
+input[type="date"],
+input[type="number"],
+textarea,
+input[type="file"] {
+    width: calc(100% - 22px);
+    padding: 10px;
+    margin-top: 5px;
+    border: 1px solid #37474f;
     border-radius: 4px;
-    font-size: 16px;
+    background-color: #263238;
+    color: #e0e0e0;
     box-sizing: border-box;
+    transition: border-color 0.3s ease;
+}
+
+input[type="text"]:focus,
+input[type="date"]:focus,
+input[type="number"]:focus,
+textarea:focus,
+input[type="file"]:focus {
+    border-color: #64b5f6;
+    outline: none;
 }
 
 textarea {
     resize: vertical;
-    min-height: 100px;
 }
 
-button {
-    background-color: #3498db;
-    color: white;
-    border: none;
-    cursor: pointer;
-    font-size: 16px;
-    margin-top: 20px;
-    transition: background-color 0.3s ease;
-}
-
-button:hover {
-    background-color: #2980b9;
-}
-
-/* Invoice Output Styles */
-#invoiceOutput {
-    background: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    margin-top: 20px;
-}
-
-#invoiceOutput p {
-    margin: 10px 0;
-}
-
-#invoiceOutput img {
-    max-width: 100%;
-    height: auto;
-    margin-top: 15px;
-    border-radius: 4px;
-}
-
-/* Download Button Styles */
-#downloadInvoice {
-    display: none; /* Hidden by default */
-    background-color: #27ae60;
+button, #saveCompanyInfo {
+    background: linear-gradient(to right, #1e88e5, #64b5f6);
     color: white;
     padding: 12px 20px;
     border: none;
-    border-radius: 4px;
+    border-radius: 6px;
     cursor: pointer;
-    font-size: 16px;
     margin-top: 20px;
-    transition: background-color 0.3s ease;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+    width: 100%;
+    box-sizing: border-box;
 }
 
-#downloadInvoice:hover {
-    background-color: #219653;
+button:hover, #saveCompanyInfo:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-    body {
-        padding: 10px;
-    }
+#downloadInvoice {
+    display: block;
+    margin: 20px auto;
+    width: 95%;
+    max-width: 200px;
+    box-sizing: border-box;
+}
 
-    form, #invoiceOutput {
+/* Media Query for Smaller Screens */
+@media (max-width: 600px) {
+    div, form, #invoiceOutput {
         padding: 15px;
-    }
-
-    input, textarea, button {
-        padding: 10px;
-        font-size: 14px;
-    }
-
-    button {
-        margin-top: 15px;
-    }
-}
-
-@media (max-width: 480px) {
-    h1 {
-        font-size: 24px;
-    }
-
-    h2 {
-        font-size: 20px;
-    }
-
-    label {
-        font-size: 14px;
-    }
-
-    input, textarea, button {
-        padding: 8px;
-        font-size: 12px;
-    }
-
-    #downloadInvoice {
-        padding: 10px 15px;
-        font-size: 14px;
     }
 }
